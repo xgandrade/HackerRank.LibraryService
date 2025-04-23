@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LibraryService.WebAPI.Data;
+﻿using LibraryService.WebAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryService.WebAPI.Services
@@ -15,34 +12,50 @@ namespace LibraryService.WebAPI.Services
             _libraryContext = libraryContext;
         }
 
-        public async Task<IEnumerable<Book>> Get(int libraryId, int[] ids)
+        public async Task<IEnumerable<Book>> Get(int libraryId)
         {
-            // Complete the implementation
-            throw new NotImplementedException();
+            var books = _libraryContext.Books.AsQueryable();
+            books = books.Where(x => x.LibraryId == libraryId);
+
+            return await books.ToListAsync();
         }
 
         public async Task<Book> Add(Book book)
         {
-            // Complete the implementation
-            throw new NotImplementedException();
+            await _libraryContext.Books.AddAsync(book);
+            await _libraryContext.SaveChangesAsync();
+
+            return book;
         }
 
         public async Task<Book> Update(Book book)
         {
-            // Complete the implementation
-            throw new NotImplementedException();
+            var projectForChanges = await _libraryContext.Books.SingleAsync(x => x.Id == book.Id);
+            projectForChanges.Name = book.Name;
+            projectForChanges.Category = book.Category;
+            projectForChanges.LibraryId = book.LibraryId;
+
+            _libraryContext.Books.Update(projectForChanges);
+            await _libraryContext.SaveChangesAsync();
+            return book;
         }
 
         public async Task<bool> Delete(Book book)
         {
-            // Complete the implementation
-            throw new NotImplementedException();
+            var projectForDelete = _libraryContext.Books.FirstOrDefault(x => x.Id == book.Id);
+            if (projectForDelete == null)
+                return false;
+
+            _libraryContext.Books.Remove(projectForDelete);
+            await _libraryContext.SaveChangesAsync();
+
+            return true;
         }
     }
 
     public interface IBooksService
     {
-        Task<IEnumerable<Book>> Get(int libraryId, int[] ids);
+        Task<IEnumerable<Book>> Get(int libraryId);
 
         Task<Book> Add(Book book);
 

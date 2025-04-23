@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LibraryService.WebAPI.Data;
+﻿using LibraryService.WebAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryService.WebAPI.Services
@@ -29,8 +25,8 @@ namespace LibraryService.WebAPI.Services
         public async Task<Library> Add(Library library)
         {
             await _libraryContext.Libraries.AddAsync(library);
-
             await _libraryContext.SaveChangesAsync();
+
             return library;
         }
 
@@ -54,8 +50,17 @@ namespace LibraryService.WebAPI.Services
 
         public async Task<bool> Delete(Library library)
         {
-            // Complete the implementation
-            throw new NotImplementedException();
+            var projectsForDelete = _libraryContext.Books.Where(x => x.LibraryId == library.Id);
+            if (projectsForDelete == null || !projectsForDelete.Any())
+                return false;
+
+            _libraryContext.Books.RemoveRange(projectsForDelete);
+
+            var librariesForDelete = _libraryContext.Libraries.FirstOrDefault(x => x.Id == library.Id);
+            _libraryContext.Libraries.Remove(librariesForDelete);
+            await _libraryContext.SaveChangesAsync();
+
+            return true;
         }
     }
 
