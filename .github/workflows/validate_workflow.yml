@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Validate repo
         run: |
-          if [[ $REPO_NAME == [[:digit:]]* ]]
+          if [[ $REPO_NAME == HackerRank* ]]
           then
             echo 'Repo is valid =>' $REPO_NAME
           else
