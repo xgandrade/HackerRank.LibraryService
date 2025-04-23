@@ -1,4 +1,4 @@
-name: .NET CI
+name: .NET Tests
 
 on:
   push:
@@ -11,19 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup do .NET
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: 6.0.x
 
-      - name: Restore dependências
+      - name: Restaurar dependências
         run: dotnet restore
 
-      - name: Build
+      - name: Build do projeto
         run: dotnet build --no-restore --configuration Release
 
-      - name: Testes xUnit
-        run: dotnet test --no-build --logger xunit --results-directory ./reports/
+      - name: Executar testes
+        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory ./reports/
+
+      - name: Publicar resultados dos testes
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: ./reports/test-results.trx
+          reporter: dotnet-trx
